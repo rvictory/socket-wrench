@@ -1,1 +1,4 @@
-This file was created by JetBrains RubyMine 5.0 for binding GitHub repository
+Socket Wrench - WebSockets made easy
+
+Socket Wrench consists of two parts, a server written in Sinatra/em-websocket and a client side javascript library.
+Socket wrench makes it dead simple to write websocket driven applications that take advantage of this awesome technology.
