@@ -6,7 +6,7 @@ Socket wrench makes it dead simple to write websocket driven applications that t
 TODO: need to fix syntax for declaring the protocols/commands
 TODO: Support for multiple "channels" within a protocol to allow for something like a chat system with multiple rooms
 
-High level example for a chat room:
+High level example for a chat room (even though this is mostly pseudo code, the actual code using Socket Wrench wouldn't be much longer):
 
 Protocol: chat
 Commands: join, leave, update
@@ -25,3 +25,20 @@ end
 Protocol chat, on update do |data|
     broadcast to all clients that data.username sent message data.message
 end
+
+Client side JavaScript:
+
+socket = SocketWrench.create("url", "port", "chat");
+socket.on("join", function (data) {
+    addToUserList(data.username);
+    writeChatMessage(null, data.username + " joined the chat!");
+});
+
+socket.on("leave", function (data) {
+    removeFromUserList(data.username);
+    writeChatMessage(null, data.username + " left the chat!");
+});
+
+socket.on("update", function (data) {
+    writeChatMessage(data.username, data.message);
+});
