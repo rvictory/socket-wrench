@@ -1,16 +1,48 @@
 <html>
 <head>
   <script src="/socketwrench.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 </head>
 <body>
-<a href="#" onclick='socket.send("update", "test");'>Click me!</a>
-<div id="log">
+    <h3>Simple chat demo</h3>
+    Username: <input type="text" id="username"> <button id="joinChat">Join</button>
+    <h4>Client List</h4>
+    <select id="clientList" multiple="true">
 
-</div>
+    </select>
+    <br>
+    <input type="text" id="message"> <button id="sendMessage">Send</button>
+    <div id="chatRoom">
+
+    </div>
 <script>
-    socket = SocketWrench.create("localhost", "9001", "test");
+  //Yeah yeah, it's a demo so I'm not going to care about polluting the window object
+    window.username = "";
+    socket = SocketWrench.create("localhost", "9001", "chat");
+    socket.on("join", function (data) {
+        $('#clientList').append("<option class='" + data.username + "'>" + data.username + "</option>");
+    });
+    socket.on("leave", function (data) {
+        $('#clientList').find("." + data.username).remove();
+    });
     socket.on("update", function (data) {
-        document.getElementById("log").innerHTML = document.getElementById("log").innerHTML + "<br>" + (JSON.stringify(data));
+        var newRow = $("<div></div>");
+        $(newRow).text(data.username + ": " + data.text);
+        $('#chatRoom').append(newRow);
+    });
+    socket.on("user_list", function (data) {
+        $('#clientList').html("");
+        for (var i = 0; i < data.list.length; i++) {
+            $('#clientList').append("<option class='" + data.list[i] + "'>" + data.list[i] + "</option>");
+        }
+    });
+    $('#joinChat').click(function () {
+        window.username = $('#username').val();
+        socket.send("join", {username : window.username});
+    });
+    $('#sendMessage').click(function () {
+        socket.send("update", {username : window.username, text : $('#message').val()});
+        $('#message').val('').focus();
     });
 </script>
 </body>
