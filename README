@@ -2,3 +2,26 @@ Socket Wrench - WebSockets made easy
 
 Socket Wrench consists of two parts, a server written in Sinatra/em-websocket and a client side javascript library.
 Socket wrench makes it dead simple to write websocket driven applications that take advantage of this awesome technology.
+
+TODO: need to fix syntax for declaring the protocols/commands
+TODO: Support for multiple "channels" within a protocol to allow for something like a chat system with multiple rooms
+
+High level example for a chat room:
+
+Protocol: chat
+Commands: join, leave, update
+
+Server side (this is pseudo code):
+
+Protocol chat, on join do |data|
+    broadcast to all clients that data.username joined
+end
+
+Protocol chat, on leave do |data|
+    broadcast to all clients that data.username left the room
+    remove the client from the client list
+end
+
+Protocol chat, on update do |data|
+    broadcast to all clients that data.username sent message data.message
+end

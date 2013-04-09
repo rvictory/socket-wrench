@@ -31,7 +31,7 @@ var SocketWrench = {
                 ws.send(JSON.stringify({command : command, data : data}));
             },
             close : function () {
-
+                ws.close();
             },
             isOpen : function () {
 

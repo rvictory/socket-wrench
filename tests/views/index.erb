@@ -3,12 +3,15 @@
   <script src="/socketwrench.js"></script>
 </head>
 <body>
-<script>
-  socket = SocketWrench.create("localhost", "9001", "test");
-  socket.on("update", function (data) {
-      console.log(JSON.stringify(data));
-  });
-</script>
 <a href="#" onclick='socket.send("update", "test");'>Click me!</a>
+<div id="log">
+
+</div>
+<script>
+    socket = SocketWrench.create("localhost", "9001", "test");
+    socket.on("update", function (data) {
+        document.getElementById("log").innerHTML = document.getElementById("log").innerHTML + "<br>" + (JSON.stringify(data));
+    });
+</script>
 </body>
 </html>
