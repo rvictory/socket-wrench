@@ -11,21 +11,45 @@ High level example for a chat room (even though this is mostly pseudo code, the 
 Protocol: chat
 Commands: join, leave, update
 
-Server side (this is pseudo code):
+Server side (this is all the code you'd have to write):
 
-Protocol chat, on join do |data|
-    broadcast to all clients that data.username joined
-end
+    @@user_list = []
 
-Protocol chat, on leave do |data|
-    broadcast to all clients that data.username left the room
-    remove the client from the client list
-end
+    @@socket = SocketWrench.new(9001)
 
-Protocol chat, on update do |data|
-    broadcast to all clients that data.username sent message data.message
-end
+    @@socket.protocol("chat") do
 
+    on "update" do
+      # Send updates to all clients in the channel
+      send_to_channel("update", data)
+    end
+
+    on "join" do
+      unless @@user_list.include? data['username']
+        # Tell the client the user list
+        send_to_client("user_list", {'list' => @@user_list})
+        @@user_list.push(data['username'])
+        # Tell the channel that somebody joined
+        send_to_channel("join", data)
+      end
+    end
+
+    on "leave" do
+      if @@user_list.include? data['username']
+        # Tell the channel that somebody left
+        send_to_channel("leave", data)
+        @@user_list.delete(data['username'])
+      end
+    end
+
+    on "username_check" do
+      send_to_client("username_check", @@user_list.include?(data['username']))
+    end
+
+    end
+
+    @@socket.begin_listening
+-------------------------
 Client side JavaScript:
 
 socket = SocketWrench.create("url", "port", "chat");
