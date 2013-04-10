@@ -14,6 +14,11 @@ class SocketWrench
     @protocols[name]
   end
 
+  def protocol (name, &block)
+    @protocols[name] = @protocols[name] || Protocol.new(name)
+    @protocols[name].instance_eval(&block)
+  end
+
   def execute (protocol, data, client)
     data = JSON.parse(data)
     puts data.inspect

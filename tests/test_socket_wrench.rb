@@ -14,32 +14,35 @@ EventMachine.run do
 
       @@socket = SocketWrench.new(9001)
 
-      @@socket.get_protocol("chat").command("update") do |protocol, data, client, channel|
-        # Send updates to all clients in the channel
-        protocol.push(channel, "update", data)
-      end
+      @@socket.protocol("chat") do
 
-      @@socket.get_protocol("chat").command("join") do |protocol, data, client, channel|
-        unless @@user_list.include? data['username']
-          # Tell the client the user list
-          protocol.push(client, "user_list", {'list' => @@user_list})
-          @@user_list.push(data['username'])
-          # Tell the clients that somebody joined
-          protocol.push(channel, "join", data)
-
+        on "update" do
+          # Send updates to all clients in the channel
+          send_to_channel("update", data)
         end
-      end
 
-      @@socket.get_protocol("chat").command("leave") do |protocol, data, client, channel|
-        if @@user_list.include? data['username']
-          # Tell the clients that somebody joined
-          protocol.push(channel, "leave", data)
-          @@user_list.delete(data['username'])
+        on "join" do
+          unless @@user_list.include? data['username']
+            # Tell the client the user list
+            send_to_client("user_list", {'list' => @@user_list})
+            @@user_list.push(data['username'])
+            # Tell the channel that somebody joined
+            send_to_channel("join", data)
+          end
         end
-      end
 
-      @@socket.get_protocol("chat").command("username_check") do |protocol, data, client, channel|
-        protocol.push(client, "username_check", @@user_list.include?(data['username']))
+        on "leave" do
+          if @@user_list.include? data['username']
+            # Tell the channel that somebody left
+            send_to_channel("leave", data)
+            @@user_list.delete(data['username'])
+          end
+        end
+
+        on "username_check" do
+          send_to_client("username_check", @@user_list.include?(data['username']))
+        end
+
       end
 
       @@socket.begin_listening
